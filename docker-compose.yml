@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password 
+      MYSQL_DATABASE: Posting
+    volumes:
+      - db-data:/var/lib/mysql
+
+  backend:
+    image: node:14
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: password
+      DB_NAME: Posting
+    ports:
+    - "3001:3001"
+    volumes:
+    - ./Server:/app
+    command: sh -c "npm install && mkdir -p /app/uploads && node server.js"
+    working_dir: /app
+
+  frontend:
+    image: node:14
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+    command: sh -c "npm install && npm start"
+    working_dir: /app
+
+volumes:
+  db-data:
